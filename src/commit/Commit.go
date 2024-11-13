@@ -10,7 +10,7 @@ import (
 
 const(
 	regexp_extract_commit_id = `commit ([a-z0-9]{40})`
-	regexp_extract_commit_msg = `(?m)^    (.+)`
+	regexp_extract_commit_msg = `(?m)^    (.+|\n)`
 	regexp_covcom = `^(build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test){1}(\([\w\-]+\))?(!)?: .{1,80}(\n|\r\n){2}(.*(\n|\r\n)*)*$`
 )
 
@@ -58,9 +58,13 @@ func New(id string) (Commit,error){
 	var msg string
 	msg_line_matchs := regexp.MustCompile(regexp_extract_commit_msg).FindAllStringSubmatch(raw_commit,-1)
 	for _,msg_line := range msg_line_matchs{
-		msg += msg_line[1] + "\n"
+		if msg_line[1] == "\n"{
+			msg += "\n"
+		} else{
+			msg += msg_line[1] + "\n"
+		}
 	}
-	msg = strings.Trim(msg,"\n")
+	msg = strings.TrimRight(msg,"\n")
 	Log.Verb("extracted commit message : {\n%s\n}",msg)
 
 	convcom_match := regexp.MustCompile(regexp_covcom).FindStringSubmatch(msg)

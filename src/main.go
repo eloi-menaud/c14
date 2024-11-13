@@ -6,7 +6,7 @@ import (
 )
 
 func main(){
-	cmt, err := commit.New("e8b6a0f")
+	cmt, err := commit.New("ee011da250bb8cf75ef590d8341677fa75285003")
 	fmt.Println(err)
 	fmt.Println(cmt)
 }
