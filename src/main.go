@@ -6,7 +6,6 @@ import (
 )
 
 func main(){
-	cmt, err := commit.New("ee011da250bb8cf75ef590d8341677fa75285003")
-	fmt.Println(err)
-	fmt.Println(cmt)
+	cmt, _ := commit.New("67d41cfbc17ffed47be60e157fd09733c490d856")
+	fmt.Println(cmt.String())
 }

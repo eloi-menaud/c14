@@ -1,12 +1,17 @@
-![](./doc_rsc/c14_small.png)
-# c14 (carbone 14)
-auto semantic version for any target based on conventional commits
-- [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/) checker
-- [semantic version](https://semver.org/lang/fr/) calculation for any directory/file
+<div align="center">
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/eloi-menaud/c14/refs/heads/main/rsc/dark-banner.png">
+  <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/eloi-menaud/c14/refs/heads/main/rsc/light-banner.png">
+  <img alt="Shows a black logo in light color mode and a white one in dark color mode." src="">
+</picture>
+
+[conventional commits](https://www.conventionalcommits.org/en/v1.0.0/) · [semantic version](https://semver.org/lang/fr/)
+
+</div>
 
 ```
 c14 version [target]    # return version of the target regarding its commit
-c14 check   [commit id] # check if a commit is conventional commits compatible
 ```
 
 <br><br><br><br>
@@ -19,35 +24,47 @@ will calculate a version for the specific `[target]` (directory or file in the r
 > `[target]` is optional, if not specified it will calculat the version for `.` directory
 
 ## flags
+- `--only-check <commit id>` : will just check if the provided commit is `conventional commit` or not
 - `--branch <branch name>` : use the specified branch instead of the current one
 - `--from <commit id>` : start commit history from a specific commit id
-- `--not-strict` : if the last commit message is not `conventional commits` compatible (`c14 check` failed), will just skip it instead of throwing error
-- All `c14 check` flags are available
-
-
-<br><br>
-
-# `c14 check`
-`c14 check [commit id]`
-will check if the specific commit is `conventional commits` compatible (in a c14 way, see `specification`)
-> `[commit id]` is optional, if not specified it will check the last commit
-## flags
-`--not-force-standard-secondary-types` : types other than `feat` and `fix` can be others than `build` `chore` `ci` `docs` `style` `refactor` `perf` `test` (in accord to conventional commits rules _14._)
-
-`--not-force-secondary-types` : make the usage of types other than `feat` and `fix` optional (in accord to conventional commits rules _14._)
+- `--not-strict` : if the last commit message is not `conventional commits` compatible, will just skip it instead of throwing error
+- `--allow-unstandard-types` : types other than `feat` and `fix` can be others than `build` `chore` `ci` `docs` `style` `refactor` `perf` `test` (in accord to conventional commits rules _14._)
+- `--allow-no-secondary-types` : make the usage of types optionnal in no no feat/fix commit (in accord to conventional commits rules _14._)
+- `--no-breaking-change-footer` : don't use `BREAKING CHANGE` key footer (only use the `!` mark)
 
 
 <br><br><br><br>
 
-# specification
+# 📋 specification
 Commit message must follow [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/). but `c14` differs slightly :
 
-#### [8, 9, 10, 11] _footers_
-git 'footers' are not taking into accunt so :
-- rules 8, 9, 10 are skiped
-- rules 11 becams : _Breaking changes MUST be indicated in the type/scope prefix of a commit, ~~or as an entry in the footer~~._
+#### if `--no-breaking-change-footer` used:
 
-#### [14] _secondary types_
-secondary types (types other than `fix` and `feat`) are by default mandatory and must by standard ones (`build` `chore` `ci` `docs` `style` `refactor` `perf` `test`).
+13. : _If included in the type/scope prefix, breaking changes MUST be indicated by a ! immediately before the :. ~~If ! is used, BREAKING CHANGE: MAY be omitted from the footer section, and the commit description SHALL be used to describe the breaking change.~~_
 
-To use the original `14.` rules, use `--not-force-standard-secondary-types` and `--not-force-secondary-types` falgs
+#### if `--allow-no-secondary-types` not used :
+
+14. _Types other than feat and fix ~~MAY~~ MUST be used in your commit messages_
+
+---
+
+#### if `--allow-unstandard-types` not used :
+
+14. _Types other than feat and fix MAY be used in your commit messages._ And MUST be one of the following : build, chore, ci, docs, style, refactor, perf, test.
+- there is no rules about their signifaication but here some common definition :
+	- `build:` editing compilation, deployment, dependencies ...
+		> configure TypeScript for stricter type checking
+	- `chore:` project task stuff (e.g. .gitignore)
+		> update .gitignore to exclude temp files
+	- `ci:` editing ci parts
+		> add caching to reduce build time on Travis CI
+	- `docs:` changes the documentation
+		> typo in README.md
+	- `style:` for code appearance improvements, e.g. convention, trailing space... (no production code change)
+		> remove trailing spaces
+	- `refactor:` change code structure (no production code change)
+		> use snake_case instead of camelCase
+	- `perf:` Use for performance improvements (no production code change)
+		> optimize sql query
+	- `test:` editing tests
+		> add unit tests for user authentication logic

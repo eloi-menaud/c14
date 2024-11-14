@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-var Verbose bool = true
+var Verbose bool = false
 
 func Verb(format string, args ...interface{}){
 	if Verbose {
