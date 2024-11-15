@@ -11,8 +11,15 @@ import (
 const(
 	regexp_extract_commit_id = `commit ([a-z0-9]{40})`
 	regexp_extract_commit_msg = `(?m)^    (.+|\n)`
-	regexp_covcom = `(?ms)^(build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test){1}\(([\w\-]+)\)?(!)?: (.+)(?:\n|\r\n){2}(.*)$`
+	regexp_covcom = `(?ms)^(build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test){1}(?:\(([\w\-]+)\))?(!)?: ([^(\n|\r\n)]+)(?:\n|\r\n){2}(.+)$`
+	regexp_git_footer_key_start=`(?m)^([\w-]+|BREAKING CHANGE)(: | #).`
+	regexp_single_git_footer_data=`(?ms)^([\w-]+|BREAKING CHANGE)(?:: | #)(.+)`
 )
+
+type Footer struct{
+	key   string
+	value string
+}
 
 type Commit struct{
 	Id        string
@@ -20,6 +27,7 @@ type Commit struct{
 	Scope     string
 	Descr     string
 	Body      string
+	Footers   []Footer
 	IsBreak   bool
 	IsConvCom bool
 }
@@ -107,8 +115,85 @@ func New(id string) (Commit,error){
 		res.Scope     = convcom_match[2]
 		res.IsBreak   = (convcom_match[3] == "!" || res.Type == "break")
 		res.Descr     = convcom_match[4]
-		res.Body      = convcom_match[5]
+		body         := convcom_match[5]
+
+		/*
+			conventional commit use footer with multiligne,
+			in regex is not possible to matche a repeted sub-pattern if it is on multiple line like :
+				key: value
+				on multiple line
+				key: value
+				-->
+				[key: value
+				on multiple line,
+				key: value]
+			so :
+		*/
+		/*
+			we start by separating le body and footers bloc by spliting a the first 'key: value' met
+
+			....
+			key: value
+			multi line
+			key: value
+
+			>>>
+
+			[...,
+			key: value
+			multi line
+			key: value]
+		*/
+		Log.Verb("separating footer to body")
+		splitted_body := regexp.MustCompile(regexp_git_footer_key_start).Split(body,1)
+		if len(splitted_body) == 1 {
+			Log.Verb("Seams to have no footer bloc : Not find the start of footer, nothing match '%s' in body", regexp_git_footer_key_start)
+			res.Body = body
+		} else {
+			res.Body = splitted_body[0]
+			/*
+			we mark all keyvalue start by prefixing it with §,
+			we cannot just split footer's bloc at each 'key: value\n' cause separator are lost during
+			splitting, so 'key: value\n' will be lost, so we add a useless separator that can be lost
+
+			§key: value
+			multi line
+			key: value
+
+			>>>
+
+			§key: value
+			multi line
+			§key: value
+
+			*/
+			footer_bloc := splitted_body[1]
+			marked_footer := regexp.MustCompile(regexp_git_footer_key_start).ReplaceAllStringFunc(
+				footer_bloc, func(match string) string {
+					return "§" + match
+				},
+			)
+			/*
+			[key: value
+			multi line,
+			key: value]
+			*/
+			raw_footer_list := strings.Split(marked_footer,"§")
+
+			for _,raw_footer := range raw_footer_list{
+				footer_data_match := regexp.MustCompile(regexp_single_git_footer_data).FindStringSubmatch(raw_footer)
+				if len(footer_data_match) == 0 {
+					Log.Info("/!\\ can't retrieve data for a single footer, but error shouldn't be triggered cause elready splitted regarding footer match")
+				}
+				res.Footers = append(res.Footers, Footer{
+					key:   footer_data_match[1],
+					value: footer_data_match[2],
+				})
+			}
+		}
+
 	}
+
 
 	Log.Verb("commit parsed ✓\n")
 

@@ -1,36 +1,56 @@
 <div align="center">
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/eloi-menaud/c14/refs/heads/main/rsc/dark-banner.png">
-  <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/eloi-menaud/c14/refs/heads/main/rsc/light-banner.png">
-  <img alt="Shows a black logo in light color mode and a white one in dark color mode." src="">
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/eloi-menaud/c14/refs/heads/main/rsc/dark-banner.png" height="100">
+  <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/eloi-menaud/c14/refs/heads/main/rsc/light-banner.png" height="100">
+  <img alt="Shows a black logo in light color mode and a white one in dark color mode." src="" height="100">
 </picture>
+
+<br>
+
+c14 (carbone 14), an auto semantic version calculation based on conventional commits
 
 [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/) · [semantic version](https://semver.org/lang/fr/)
 
 </div>
 
+<br><br>
+
+```bash
+c14 version  # calcul the version of a target (dir or file)
+c14 release  # calcul the version of the repo and create release
+c14 check    # check if a commit is conventional commits
 ```
-c14 version [target]    # return version of the target regarding its commit
-```
 
-<br><br><br><br>
+<br><br><br>
 
-# `c14 version`
-`c14 version [target]`
+# c14 version | c14 release
+- `c14 version <target> [flags]`
 
-will calculate a version for the specific `[target]` (directory or file in the repo) regarding all commit impacting it
+	will calculate a version for the specific `<target>` (directory or file in the repo) regarding all commit impacting it
 
-> `[target]` is optional, if not specified it will calculat the version for `.` directory
 
-## flags
+- `c14 release [flags]`
+
+	will calculate a version for the repo ( equivalant to `c14 version .` ) then create git release
+
+### Flags
 - `--only-check <commit id>` : will just check if the provided commit is `conventional commit` or not
 - `--branch <branch name>` : use the specified branch instead of the current one
 - `--from <commit id>` : start commit history from a specific commit id
 - `--not-strict` : if the last commit message is not `conventional commits` compatible, will just skip it instead of throwing error
-- `--allow-unstandard-types` : types other than `feat` and `fix` can be others than `build` `chore` `ci` `docs` `style` `refactor` `perf` `test` (in accord to conventional commits rules _14._)
-- `--allow-no-secondary-types` : make the usage of types optionnal in no no feat/fix commit (in accord to conventional commits rules _14._)
+
+<br>
+
+# c14 check
+- `c14 check < --id commit_id | --str message > [flags]` : try to parse given value (message or commit) and check if it is convential commit compatible (in a 'c14', depending of flags)
+
+<br>
+
+# global flags
 - `--no-breaking-change-footer` : don't use `BREAKING CHANGE` key footer (only use the `!` mark)
+- `--allow-no-secondary-types` : make the usage of types optionnal for commits that are not feat/fix (in accord to conventional commits rules _14._)
+- `--allow-unstandard-types` : types other than `feat` and `fix` can be others than `build` `chore` `ci` `docs` `style` `refactor` `perf` `test` (in accord to conventional commits rules _14._)
 
 
 <br><br><br><br>
@@ -46,7 +66,6 @@ Commit message must follow [conventional commits](https://www.conventionalcommit
 
 14. _Types other than feat and fix ~~MAY~~ MUST be used in your commit messages_
 
----
 
 #### if `--allow-unstandard-types` not used :
 
