@@ -33,7 +33,7 @@ c14 parse
 
 # Install
 ```bash
-curl -fsSL https://raw.githubusercontent.com/eloi-menaud/h/refs/heads/main/dist/c14 -o /usr/local/bin/c14 && chmod +x /usr/local/bin/c14
+curl -fsSL https://github.com/eloi-menaud/c14/raw/refs/heads/main/dist/c14 -o /usr/local/bin/c14 && chmod +x /usr/local/bin/c14
 ```
 
 # `c14 version`
