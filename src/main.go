@@ -10,7 +10,7 @@ import (
 	"flag"
 )
 
-const version = "1.1.0"
+const version = "1.1.1"
 
 func main(){
 
@@ -144,7 +144,7 @@ Flags :
 
 
 	case "parse" :
-		usage = `z
+		usage = `
 c14 parse [flags] <revision>
 
 Parse all commits to conventional commit format and return as JSON.
@@ -167,6 +167,13 @@ Flags :
 		flag.CommandLine.Parse(action_args)
 		args := flag.Args()
 
+		if *help{
+			flag.Usage(); os.Exit(0)
+		}
+		if *spec{
+			Log.Info("%s",utils.GetSpecification()); os.Exit(0)
+		}
+
 		if len(args) < 1 {
 			Log.Info(usage)
 			Log.Fatal("You must provide a <revision>:\n%s",utils.GetRevisionHelpMessage())
@@ -175,14 +182,6 @@ Flags :
 		revision := args[0]
 
 		flag.CommandLine.Parse(args[1:])
-
-		if *help{
-			flag.Usage(); os.Exit(0)
-		}
-
-		if *spec{
-			Log.Info("%s",utils.GetSpecification()); os.Exit(0)
-		}
 
 		err := act.Parse(revision, *strict, *target)
 		if err != nil {

@@ -5,6 +5,8 @@ import "fmt"
 
 func GetSpecification() string {
 	return fmt.Sprintf(`
+── commit specification ──
+
 commit must follow 'conventional commit' specification
   See : https://www.conventionalcommits.org/en/v1.0.0/#specification
 
