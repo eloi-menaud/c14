@@ -8,7 +8,7 @@ import (
 
 
 
-func Changelog(format string, revision string) error {
+func Changelog(format string, revision string, target string) error {
 
 	if  (format == "") ||
 		((format != "md") && (format != "html") && (format != "text")){
@@ -22,7 +22,7 @@ func Changelog(format string, revision string) error {
 
 
 	// getting commits
-	raw_commits, err := utils.GetCommits(revision)
+	raw_commits, err := utils.GetCommits(revision, target)
 	if err != nil {
 		return fmt.Errorf("failed to fetch commit history : %v",err)
 	}
@@ -47,19 +47,19 @@ func Changelog(format string, revision string) error {
 
 	switch format{
 	case "text" :
-		res,err := changelog.Text()
+		res,err := changelog.Text(target)
 		if err != nil {
 			Log.Fatal("failed to build '%s' changelog : %v",format, err)
 		}
 		Log.Res("%s",res)
 	case "md" :
-		res,err := changelog.Md()
+		res,err := changelog.Md(target)
 		if err != nil {
 			Log.Fatal("failed to build '%s' changelog : %v", format, err)
 		}
 		Log.Res("%s",res)
 	case "html" :
-		res,err := changelog.Html()
+		res,err := changelog.Html(target)
 		if err != nil {
 			Log.Fatal("failed to build '%s' changelog : %v", format, err)
 		}

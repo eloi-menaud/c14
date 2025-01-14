@@ -11,7 +11,7 @@ import (
 )
 
 const(
-	git_log_json_format = `--pretty=format:{"id": "%H","message":"%B","tag":"%(describe:tags=true)"}`
+	git_log_json_format = `--pretty=format:{"id": "%H","message":"%B","tag":"%(describe:tags=true)"},`
 )
 
 
@@ -40,16 +40,21 @@ func CheckRevision(revision string) error {
 
 
 
-func GetCommits(revision string) ([]RawCommit, error) {
+func GetCommits(revision string, target string) ([]RawCommit, error) {
 
 	// build git command args depending of config.config
-	args := []string{"--no-pager", "show", "--no-patch", git_log_json_format + ","}
+	args := []string{"--no-pager", "show", "--no-patch", git_log_json_format}
 
 	if revision != ""{
 		args = append(args, revision)
 	}
 
+	if target != ""{
+		args = append(args, "--", target)
+	}
+	Log.Verb("target: %s", target)
 
+	Log.Verb("%v",args)
 	// executing command
 	stdout, stderr, err := Cmd("git",args...)
 	stdout = strings.ReplaceAll(stdout, "\n", "\\n")

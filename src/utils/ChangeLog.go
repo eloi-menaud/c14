@@ -65,15 +65,14 @@ func toString(tpl string, c ChangeLog) (string, error){
 }
 
 
-func (c ChangeLog) Text() (string,error){
-	tpl := `
-== changelog ==
-{{- range . }}
+func (c ChangeLog) Text(target string) (string,error){
+	title := "== changelog =="
+	if target != "" { title = "== changelog " + target + " =="}
+	tpl := title + `{{- range . }}
 {{ if .Tag }}
-{{ .Tag }}
-{{- else }}
-*{{ end }}
-
+{{- .Tag }}
+{{- else if and (gt (len .Feat) 0) (gt (len .Fix) 0) }}
+*{{- end -}}
 {{- if gt (len .Feat) 0 }}
   Feat :
   {{- range .Feat }}
@@ -81,7 +80,7 @@ func (c ChangeLog) Text() (string,error){
       {{- if ( .GetBreakingChangeDetails )}}
       break : {{( .GetBreakingChangeDetails )}}{{ end }}
   {{- end }}
-{{- end }}
+{{- end -}}
 {{- if gt (len .Fix) 0 }}
   Fix :
   {{- range .Fix }}
@@ -95,9 +94,9 @@ func (c ChangeLog) Text() (string,error){
 	return toString(tpl, c)
 }
 
-func (c ChangeLog) Md() (string,error){
-	tpl := `
-# Changelog
+func (c ChangeLog) Md(target string) (string,error){
+	title := "# Changelog " + target
+	tpl := title + `
 {{- range . }}
 {{ if .Tag }}# {{ .Tag }}{{ end }}
 
@@ -125,9 +124,9 @@ func (c ChangeLog) Md() (string,error){
 
 
 
-func (c ChangeLog) Html() (string,error){
-	tpl := `
-<h1>Changelog</h1>
+func (c ChangeLog) Html(target string) (string,error){
+	title := "<h1>changelog " + target + "</h1>"
+	tpl := title + `
 {{- range . }}
 <article>
 {{ if .Tag }}<h1>{{ .Tag }}</h1>{{ end }}

@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func Parse(revision string, strict bool) error {
+func Parse(revision string, strict bool, target string) error {
 
 	// check revision
 	err := utils.CheckRevision(revision)
@@ -17,7 +17,7 @@ func Parse(revision string, strict bool) error {
 
 
 	// getting commits
-	raw_commits, err := utils.GetCommits(revision)
+	raw_commits, err := utils.GetCommits(revision, target)
 	if err != nil {
 		return fmt.Errorf("failed to fetch commit history : %v",err)
 	}

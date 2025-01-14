@@ -9,7 +9,7 @@ import (
 
 
 
-func Version(revision string, base string) error {
+func Version(revision string, base string, target string) error {
 
 	err := utils.CheckRevision(revision)
 	if err != nil {
@@ -21,7 +21,7 @@ func Version(revision string, base string) error {
 
 
 	// getting commits
-	raw_commits, err := utils.GetCommits(revision)
+	raw_commits, err := utils.GetCommits(revision, target)
 	if err != nil {
 		return fmt.Errorf("failed to fetch commit history : %v",err)
 	}
