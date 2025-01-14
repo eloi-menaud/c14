@@ -42,18 +42,19 @@ func Parse(revision string, strict bool, target string) error {
 
 
 	if len(wrong_format_commits) != 0 {
-		message := "using strict mode, following commits are not correctly formatted :\n"
+		message := "following commits are not correctly formatted :\n"
 		for _,raw_commit := range wrong_format_commits {
 			message = message + fmt.Sprintf(
-				"[%s]\n%s\n",
+				"- %s\n%s\n\n",
 				raw_commit.Id,
-				strings.ReplaceAll(raw_commit.Message, "\n", "\n  "),
+				raw_commit.Message,
 			)
 		}
+		message = strings.TrimSpace(message)
 		if strict {
-			return fmt.Errorf("%s",message)
+			return fmt.Errorf("using strict mode, %s",message)
 		} else {
-			Log.Info("%s",message)
+			Log.Info("/!\\ %s",message)
 		}
 	}
 
@@ -65,7 +66,7 @@ func Parse(revision string, strict bool, target string) error {
 	}
 	res = strings.TrimRight(strings.TrimSpace(res), ",")
 
-	Log.Info("")
+	Log.Info("\n%s","Result :")
 	Log.Res("[\n%s\n]",res)
 
 	return nil
