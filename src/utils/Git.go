@@ -63,6 +63,7 @@ func GetCommits(revision string, target string) ([]RawCommit, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch git history : %s", CmdResToString(stdout,stderr,err))
 	}
+	stdout = "[" + strings.TrimRight(stdout, ",") + "]"
 
 
 	// parsing
