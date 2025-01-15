@@ -9,7 +9,6 @@ import (
 
 func Cmd(ex string,args ...string) (string, string, error){
 
-	// Log.Verb("executing '%s %s'", ex, strings.Join(args, " "))
 
 	cmd := exec.Command(ex,args[0:]...)
 

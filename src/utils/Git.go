@@ -48,13 +48,14 @@ func GetCommits(revision string, target string) ([]RawCommit, error) {
 	if revision != ""{
 		args = append(args, revision)
 	}
+	Log.Verb("revision : %s", target)
 
 	if target != ""{
 		args = append(args, "--", target)
 	}
-	Log.Verb("target: %s", target)
+	Log.Verb("target   : %s", target)
 
-	Log.Verb("%v",args)
+	Log.Verb("cmd      : %v",args)
 	// executing command
 	stdout, stderr, err := Cmd("git",args...)
 	stdout = strings.ReplaceAll(stdout, "\n", "\\n")
@@ -62,9 +63,6 @@ func GetCommits(revision string, target string) ([]RawCommit, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch git history : %s", CmdResToString(stdout,stderr,err))
 	}
-	stdout =  "[\n" + strings.TrimSuffix(stdout, ",") + "\n]"
-
-	Log.Verb("git log result:\n%s",stdout)
 
 
 	// parsing
