@@ -65,7 +65,7 @@ Generate the changelog for the specified revision
 
 Parse all commits of the specified revision to conventional commit format and return as JSON
 
-```json
+```jsonc
 [
 	{ // if commit can't be parse
 		"id": "",
