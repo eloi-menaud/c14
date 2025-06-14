@@ -1,37 +1,62 @@
-use std::fmt::{Display, Formatter};
-use anyhow::Result;
+use anyhow::{anyhow, Result};
+use std::fmt::Display;
+use conventional::{Commit as ConventionalCommitParser, Simple as _};
+use serde::Serialize;
 
-#[derive(Debug)]
-struct Fouter{
+
+#[derive(Debug,Serialize,Clone)]
+pub struct Fouter{
     key: String,
     value: String
 }
 
-#[derive(Debug)]
-struct ConvCom {
-    type_: String,
-    scope: Option<String>,
-    description: String,
-    body: Option<String>,
-    footers: Vec<Fouter>,
-    breaking_change: bool,
+#[derive(Debug,Serialize,Clone)]
+pub struct ConvCom {
+    pub type_: String,
+    pub scope: Option<String>,
+    pub description: String,
+    pub body: Option<String>,
+    pub footers: Vec<Fouter>,
+    pub breaking_change: bool,
 }
 // impl Display for ConvCom{
 //     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
 //         write!(f,"type: {}\nscope: {},description: ")
 //     }
 // }
-#[derive(Debug)]
+
+#[derive(Debug,Serialize,Clone)]
 pub struct Commit {
-    msg: String,
-    id: String,
-    convcom: Option<ConvCom>
+    pub msg: String,
+    pub id: String,
+    pub convcom: Option<ConvCom>
 }
 
-use conventional::{Commit as ConventionalCommitParser, Simple as _};
+
+
 impl Commit {
     pub fn new(id:&str,msg: &str) -> Result<Commit>{
-        let commit = ConventionalCommitParser::new(msg)?;
+        let commit = ConventionalCommitParser::new(msg).map_err(|e| {
+            anyhow!(
+            "\x1b[0;31mError\x1b[0;0m: invalid commit format for commit
+> {id}
+
+\x1b[0;31m╭─── Commit Message\x1b[0;0m
+{}
+\x1b[0;31m╰───\x1b[0;0m
+
+\x1b[0;34m╭─── Valid Conventional Commit Template\x1b[0;0m
+\x1b[0;34m│\x1b[0;0m <type>[optional scope]: <description>
+\x1b[0;34m│\x1b[0;0m
+\x1b[0;34m│\x1b[0;0m [optional body]
+\x1b[0;34m│\x1b[0;0m
+\x1b[0;34m│\x1b[0;0m [optional 'key: value' footer(s) ]
+\x1b[0;34m╰───\x1b[0;0m
+To see more about conventional commit format rules :
+  \x1b[0;34mhttps://www.conventionalcommits.org/en/v1.0.0/#specification\x1b[0;0m",
+                msg.lines().map(|line| format!("\x1b[0;31m│\x1b[0;0m {}", line)).collect::<Vec<_>>().join("\n"))
+        })?;
+
         Ok(
             Commit{
                 msg: msg.to_string(),
@@ -61,4 +86,5 @@ impl Commit {
             convcom: None,
         }
     }
+
 }
