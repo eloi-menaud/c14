@@ -18,7 +18,9 @@ jobs:
 
       - name: Build release
         run: |
-          ls
+          set -x
+          ls -la
+          pwd
           cargo build --release
           echo "Build done"
 
