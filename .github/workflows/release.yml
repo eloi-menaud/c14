@@ -10,6 +10,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - uses: actions/checkout@v3
+
       - name: Install Rust
         uses: actions-rs/toolchain@v1
         with:
@@ -20,7 +22,6 @@ jobs:
         run: |
           set -x
           ls -la
-          pwd
           cargo build --release
           echo "Build done"
 
