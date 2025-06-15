@@ -32,6 +32,12 @@ jobs:
           echo "Version : $version"
           echo "version=$version" >> $GITHUB_OUTPUT
 
+      - name: Upload binaire
+        uses: actions/upload-artifact@v3
+        with:
+          name: c14
+          path: ./target/release/c14
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
@@ -40,3 +46,60 @@ jobs:
           files: target/release/c14
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  ppa:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Download last release from artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: c14
+
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y dpkg-dev
+
+      - name: Set-up ppa
+        run: |
+          set -x
+          # ---- create .deb
+          ls
+          VERSION=$(grep '^version' Cargo.toml | head -n1 | cut -d '"' -f2)
+          ARCH=amd64
+          NAME=$(grep '^name' Cargo.toml | head -n1 | cut -d '"' -f2)
+          
+          mkdir -p "$NAME-$VERSION/DEBIAN"
+          mkdir -p "$NAME-$VERSION/usr/local/bin"
+          cp "./$NAME" "$NAME-$VERSION/usr/local/bin/$NAME"
+          chmod +x "$NAME-$VERSION/usr/local/bin/$NAME"
+          
+          cat > "$NAME-$VERSION/DEBIAN/control" <<EOF
+          Package: $NAME
+          Version: $VERSION
+          Architecture: $ARCH
+          Maintainer: eloi menaud <eloimenaud@proton.me>
+          Description: Version calculator based on conventional commits
+          EOF
+          
+          dpkg-deb --build "$NAME-$VERSION"
+          mv "$NAME-$VERSION.deb" "$NAME.deb"
+          
+          # ---- create apt repo
+          mkdir -p repo
+          
+          cp *.deb repo/
+          
+          cd repo
+          apt-ftparchive packages . > Packages
+          gzip -k -f Packages
+          
+          apt-ftparchive release . > Release
+
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./repo
