@@ -67,6 +67,7 @@ jobs:
 
       - name: Build source package
         run: |
+          mkdir -p debian
           dch --create --package c14 --newversion ${{ needs.build.outputs.version }}-1 --distribution focal "Version ${{ needs.job1.outputs.version }}"
           debuild -S -sa
 
