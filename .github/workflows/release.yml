@@ -47,59 +47,46 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  ppa:
+  apt:
+    needs: build
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Download last release from artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: c14
+      - name: Install build dependencies
+        run: sudo apt-get update && sudo apt-get install -y build-essential devscripts debhelper dput gnupg2
 
-      - name: Install dependencies
-        run: sudo apt-get update && sudo apt-get install -y dpkg-dev
-
-      - name: Set-up ppa
+      - name: Import GPG private key
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
         run: |
-          set -x
-          # ---- create .deb
-          ls
-          VERSION=$(grep '^version' Cargo.toml | head -n1 | cut -d '"' -f2)
-          ARCH=amd64
-          NAME=$(grep '^name' Cargo.toml | head -n1 | cut -d '"' -f2)
-          
-          mkdir -p "$NAME-$VERSION/DEBIAN"
-          mkdir -p "$NAME-$VERSION/usr/local/bin"
-          cp "./$NAME" "$NAME-$VERSION/usr/local/bin/$NAME"
-          chmod +x "$NAME-$VERSION/usr/local/bin/$NAME"
-          
-          cat > "$NAME-$VERSION/DEBIAN/control" <<EOF
-          Package: $NAME
-          Version: $VERSION
-          Architecture: $ARCH
-          Maintainer: eloi menaud <eloimenaud@proton.me>
-          Description: Version calculator based on conventional commits
+          echo "$GPG_PRIVATE_KEY" | gpg --batch --import
+          gpg --list-keys
+
+      - name: Build source package
+        run: debuild -S -sa
+
+      - name: Setup SSH for Launchpad
+        env:
+          LAUNCHPAD_SSH_KEY: ${{ secrets.LAUNCHPAD_SSH_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          echo "$LAUNCHPAD_SSH_KEY" > ~/.ssh/id_launchpad
+          chmod 600 ~/.ssh/id_launchpad
+          ssh-keyscan -t ed25519 ppa.launchpad.net >> ~/.ssh/known_hosts
+
+      - name: Configure dput
+        run: |
+          cat > ~/.dput.cf <<EOF
+          [ppa]
+          fqdn = ppa.launchpad.net
+          method = sftp
+          login = elwaaaah
+          incoming = ~elwaaaah/ubuntu/c14
+          ssh_config_options = -i ~/.ssh/id_launchpad
           EOF
-          
-          dpkg-deb --build "$NAME-$VERSION"
-          mv "$NAME-$VERSION.deb" "$NAME.deb"
-          
-          # ---- create apt repo
-          mkdir -p repo
-          
-          cp *.deb repo/
-          
-          cd repo
-          apt-ftparchive packages . > Packages
-          gzip -k -f Packages
-          
-          apt-ftparchive release . > Release
 
-
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./repo
+      - name: Upload source package to Launchpad PPA
+        run: dput ppa ../*.changes
