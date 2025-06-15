@@ -8,7 +8,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
+    outputs:
+      version: ${{ steps.get_version.outputs.version }}
     steps:
       - uses: actions/checkout@v3
 
@@ -65,7 +66,9 @@ jobs:
           gpg --list-keys
 
       - name: Build source package
-        run: debuild -S -sa
+        run: |
+          dch --create --package c14 --newversion ${{ needs.build.outputs.version }}-1 --distribution focal "Version ${{ needs.job1.outputs.version }}"
+          debuild -S -sa
 
       - name: Setup SSH for Launchpad
         env:
