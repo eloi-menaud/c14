@@ -18,9 +18,22 @@
 
 
 
-c14 (carbon 14), an auto version calculator based on _conventional commits_
-
-[conventional commits](https://www.conventionalcommits.org/en/v1.0.0/)
+c14 (carbon 14), an auto version calculator based on _[conventional commits](https://www.conventionalcommits.org/en/v1.0.0/)_
 </div>
 
 <br><br><br>
+
+```text
+Usage: c14 [OPTIONS]
+
+Options:
+      --from-merge-base    Use 'git merge-base HEAD <default-branch>'
+                           instead of the last tag
+                           useful for checks during Merge/Pull Requests
+      --change-log <path>  Add changes at the top of a markdown changelog file
+      --json-report        Creat a c14-report.json
+      --strict             Exit with code 1 if a commit used doesn't follow the conventional format
+      --target <path>      Compute version only based on commits affecting the given file/dir path
+  -h, --help               Print help
+  -V, --version            Print version
+```

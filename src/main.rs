@@ -3,6 +3,7 @@
 
 mod lib;
 
+use std::fs;
 use std::fs::File;
 use std::io::Write;
 
@@ -58,7 +59,7 @@ fn main() -> anyhow::Result<()>{
         true => (lib::git::get_merge_base(&repo,&head,"main")?,lib::version::Version::default()),
         false => {
             let (f,b) = lib::git::get_last_version_tag_data(&repo)?;
-            println!("Last version tag : {b}");
+            eprintln!("Last version tag : {b}");
             (f,b)
         }
     };
@@ -66,7 +67,7 @@ fn main() -> anyhow::Result<()>{
 
     let to = head.id();
 
-    println!("Fetching commits from \x1b[0;34m{}\x1b[0;0m to \x1b[0;34m{}\x1b[0;0m...",
+    eprintln!("Fetching commits from \x1b[0;34m{}\x1b[0;0m to \x1b[0;34m{}\x1b[0;0m...",
          lib::git::oid_to_short(&repo,&from).unwrap_or_else(|e| format!("'{e}'")),
          lib::git::oid_to_short(&repo,&to).unwrap_or_else(|e| format!("'{e}'")),
     );
@@ -85,9 +86,9 @@ fn main() -> anyhow::Result<()>{
                }).collect::<Result<Vec<_>, _>>()?
         }
     };
-    println!("  \x1b[0;32mOK\x1b[0;0m ({}) commits fetch", git_commits.len());
+    eprintln!("  \x1b[0;32mOK\x1b[0;0m ({}) commits fetch", git_commits.len());
 
-    println!("Parsing fetched commits{}...", if args.strict {" (strict)"} else {""} );
+    eprintln!("Parsing fetched commits{}...", if args.strict {" (strict)"} else {""} );
     let commits : Vec<lib::commit::Commit> = git_commits.into_iter()
          .map(|git_commit| {
              lib::commit::Commit::new(
@@ -104,14 +105,14 @@ fn main() -> anyhow::Result<()>{
                  }
              })
          }).collect::<anyhow::Result<_>>()?;
-    println!("  \x1b[0;32mOk\x1b[0;m");
+    eprintln!("  \x1b[0;32mOk\x1b[0;m");
 
 
     // ---- compute version
-    println!("Computing version...");
+    eprintln!("Computing version...");
     let version_from_commits = lib::version::Version::from_commits(&commits);
     let version = lib::version::add(&base_version,&version_from_commits);
-    println!("  \x1b[0;32mOK\x1b[0;0m version {version}");
+    eprintln!("  \x1b[0;32mOK\x1b[0;0m version {version}");
 
 
     // ---- json_report
@@ -125,7 +126,7 @@ fn main() -> anyhow::Result<()>{
         commits: Vec<lib::commit::Commit>
     }
     if args.json_report {
-        println!("creating report");
+        eprintln!("creating report");
         let report = Report{
             from: from.to_string(),
             to: to.to_string(),
@@ -156,6 +157,7 @@ fn main() -> anyhow::Result<()>{
         }
 
         let mut output = String::new();
+        output += format!("# {}",version.to_string()).as_str();
         if !breaking_changes.is_empty() {
             output += "### Breaking Changes\n";
             output += &breaking_changes.join("\n");
@@ -172,9 +174,10 @@ fn main() -> anyhow::Result<()>{
             output += "\n";
         }
 
-        let mut file = File::create(args.change_log.unwrap())?;
-        file.write_all(&output.as_bytes())?;
+        let path = args.change_log.unwrap();
+        let old = fs::read_to_string(path).unwrap_or_default();
+        fs::write(&path, format!("{}\n{}", output, old))?
     }
-
+    print!("{}",version.to_string());
     Ok(())
 }
