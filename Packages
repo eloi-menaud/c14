@@ -1,0 +1,12 @@
+Package: c14
+Architecture: amd64
+Version: 0.1.0
+Maintainer: eloi menaud <eloimenaud@proton.me>
+Filename: ./c14.deb
+Size: 1298460
+MD5sum: b9389992d2fcaafc3a161a5cbb10f09d
+SHA1: 47c3e17cf5a99808e6c65ce39f460fe9018d1f8a
+SHA256: a45dd5496521e70f306a2178abca7787048f178b03bed9d1702663f636955e34
+SHA512: 0e9a9d46bbf67ae84413b1807f660ae634bdb2ede4f83033678b03cca3db3aaedb61cbb25ab8478a7dd67e84e66ee5fd08b026ba95e517a7335f71cdf8c08a53
+Description: Version calculator based on conventional commits
+
