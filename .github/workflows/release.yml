@@ -1,0 +1,42 @@
+name: Build and Release C14
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: Build Release
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+
+      - name: Build release
+        run: |
+          set -x
+          cargo build --release
+
+      - name: Get version from Cargo.toml
+        id: get_version
+        run: |
+          version=$(grep '^version' Cargo.toml | head -n1 | cut -d '"' -f2)
+          echo "Version : $version"
+          echo "version=$version" >> $GITHUB_OUTPUT
+    
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.get_version.outputs.version }}
+          name: Release v${{ steps.get_version.outputs.version }}
+          files: target/release/c14
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
