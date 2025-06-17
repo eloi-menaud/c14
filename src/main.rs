@@ -12,8 +12,11 @@ use git2::Repository;
 use serde::Serialize;
 
 #[derive(Parser, Debug)]
-#[command(name = "c14", author, version)]
-#[command(author = "Eloi Menaud")]
+#[command(
+    name = "c14",
+    version = concat!(env!("CARGO_PKG_VERSION"), " (https://github.com/eloi-menaud/c14)"),
+    author = "Eloi Menaud"
+)]
 pub struct Cli {
     #[arg(
         long = "from-merge-base",
