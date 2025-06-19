@@ -10,6 +10,7 @@ pub fn get_last_version_tag_data(repo: &Repository) -> Result<(Oid, Version)> {
     let tag_value = tmp_tag_value
         .into_iter()
         .flatten()
+        .rev()
         .find(|name| Regex::new(VERSION_REGEX).unwrap().is_match(name).to_owned())
         .ok_or(anyhow!(
             "\x1b[0;31mFailed to find a previsous tag.\x1b[0;0m
