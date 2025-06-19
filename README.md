@@ -48,31 +48,32 @@ Options:
       --from-merge-base <branch>  Use 'git merge-base HEAD <branch>'
                                   instead of the last tag
                                   useful for checks during Merge/Pull Requests
-
+                                  
       --change-log <path>         Add changes at the top of a markdown changelog file
-
+      
       --report                    Creat a c14-report.json report
-
+      
+      --parse <commit id>         Parse given commit into json format
+      
       --strict                    Exit with code 1 if a commit used doesn't follow the conventional format
-
+      
       --target <path>             Compute version only based on commits affecting the given file/dir path
-
+      
   -h, --help                      Print help
   -V, --version                   Print version
-
 ```
 
 <br><br><br>
 
-### `--report` Output Format Example
-```json
+### `--report` & `--parse` Output Format Example
+```jsonc
 {
   "from": "f7b950c0ee416bb00a0179d264f0b8c1fbd60a44",
   "to": "fdadd58ace5440b9defc944fa88ea1dacdd80553",
   "target": null,
   "version": "v0.2.0",
   "commits": [
-    {
+    { // format of --parse too 
       "msg": "feat: init\n",
       "id": "fdadd58ace5440b9defc944fa88ea1dacdd80553",
       "convcom": {

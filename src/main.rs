@@ -25,22 +25,28 @@ pub struct Cli {
                 useful for checks during Merge/Pull Requests",
         value_name = "branch"
     )]
+
+    #[arg(long, conflicts_with = "parse")]
     pub from_merge_base: Option<String>,
 
     /// Add changes at the top of a markdown changelog file
-    #[arg(long = "change-log", value_name = "path")]
+    #[arg(long = "change-log", value_name = "path", conflicts_with = "parse")]
     pub change_log: Option<String>,
 
     /// Creat a c14-report.json report
-    #[arg(long = "report", value_name = "path")]
+    #[arg(long = "report", value_name = "path", conflicts_with = "parse")]
     pub report: bool,
+
+    /// Parse given commit into json format
+    #[arg(long = "parse", value_name = "commit id")]
+    pub parse: Option<String>,
 
     /// Exit with code 1 if a commit used doesn't follow the conventional format
     #[arg(long = "strict")]
     pub strict: bool,
 
     /// Compute version only based on commits affecting the given file/dir path
-    #[arg(long = "target", value_name = "path")]
+    #[arg(long = "target", value_name = "path", conflicts_with = "parse")]
     pub target: Option<String>,
 }
 
@@ -48,6 +54,27 @@ fn main() -> anyhow::Result<()> {
     let args = Cli::parse();
 
     let repo = Repository::discover(".").expect("Can't find repository in '.'");
+
+    if let Some(commit_id) = args.parse {
+        let raw_commit = repo.revparse_single(&commit_id)?.peel_to_commit()?;
+
+        let commit = lib::commit::Commit::new(
+            &raw_commit.id().to_string(),
+            raw_commit.message_raw().unwrap_or_default(),
+        )
+        .or_else(|e| {
+            if args.strict {
+                Err(e)
+            } else {
+                Ok(lib::commit::Commit::new_raw(
+                    &raw_commit.id().to_string(),
+                    raw_commit.message_raw().unwrap_or_default(),
+                ))
+            }
+        })?;
+        print!("{}",serde_json::to_string_pretty(&commit)?);
+        return Ok(())
+    };
 
     let head = repo.head()?.peel_to_commit()?;
 
