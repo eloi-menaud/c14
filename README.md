@@ -17,7 +17,7 @@ c14 (carbon 14), an auto repo/file/dir version calculator based on _[conventiona
 
 ## Install
 ```shell
-wget https://github.com/eloi-menaud/c14/releases/download/v1.0.0/c14
+wget https://github.com/eloi-menaud/c14/releases/download/v1.1.0/c14
 mv c14 /usr/local/bin && chmod +x /usr/local/bin/c14
 ```
 ## Description
