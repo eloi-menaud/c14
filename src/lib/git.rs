@@ -51,7 +51,6 @@ pub fn is_touching(repo: &Repository, commit: &git2::Commit, path_filter: &Strin
     if commit.parent_count() == 0 {
         false;
     }
-    eprintln!("is {} touchine : {path_filter}", commit.id());
 
     let parent = commit.parent(0)?;
     let parent_tree = parent.tree()?;

@@ -10,6 +10,7 @@ pub struct Fouter {
 
 #[derive(Debug, Serialize, Clone)]
 pub struct ConvCom {
+    #[serde(rename = "type")]
     pub type_: String,
     pub scope: Option<String>,
     pub description: String,
@@ -43,7 +44,14 @@ impl Commit {
 \x1b[0;34m│\x1b[0;0m [optional 'key: value' footer(s) ]
 \x1b[0;34m╰───\x1b[0;0m
 To see more about conventional commit format rules :
-  \x1b[0;34mhttps://www.conventionalcommits.org/en/v1.0.0/#specification\x1b[0;0m",
+  \x1b[0;34mhttps://www.conventionalcommits.org/en/v1.0.0/#specification\x1b[0;0m
+
+\x1b[0;35mHint\x1b[0;0m : To edit this pushed commit you can use this command :
+SHORT_COMMIT=$(git rev-parse --short \"{id}\"); \
+GIT_SEQUENCE_EDITOR=\"sed -i.bak 's/^pick $SHORT_COMMIT/reword $SHORT_COMMIT/'\" \
+git rebase -i $(git rev-parse \"{id}\"^) && \
+git push --force-with-lease
+",
                 msg.lines()
                     .map(|line| format!("\x1b[0;31m│\x1b[0;0m {}", line))
                     .collect::<Vec<_>>()

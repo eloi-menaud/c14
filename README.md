@@ -77,7 +77,7 @@ Options:
       "msg": "feat: init\n",
       "id": "fdadd58ace5440b9defc944fa88ea1dacdd80553",
       "convcom": {
-        "type_": "feat",
+        "type": "feat",
         "scope": null,
         "description": "init",
         "body": null,
