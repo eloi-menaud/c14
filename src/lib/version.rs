@@ -64,9 +64,23 @@ impl Display for Version {
 }
 
 pub fn add(base: &Version, to_add: &Version) -> Version {
-    Version {
-        major: base.major + to_add.major,
-        minor: base.minor + to_add.minor,
-        patch: base.patch + to_add.patch,
+    if to_add.major > 0 {
+        Version {
+            major: base.major + to_add.major,
+            minor: 0,
+            patch: 0,
+        }
+    } else if to_add.minor > 0 {
+        Version {
+            major: base.major,
+            minor: base.minor + to_add.minor,
+            patch: 0,
+        }
+    } else {
+        Version {
+            major: base.major,
+            minor: base.minor,
+            patch: base.patch + to_add.patch,
+        }
     }
 }
