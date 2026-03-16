@@ -61,6 +61,16 @@ Options:
       
   -h, --help                      Print help
   -V, --version                   Print version
+
+
+
+c14 version <from>
+  --strict
+  --target -t [list]
+  
+c14 incr <source> <increment>
+c14 tag <version>
+
 ```
 
 <br><br><br>
