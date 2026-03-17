@@ -15,97 +15,66 @@ c14 (carbon 14), an auto repo/file/dir version calculator based on _[conventiona
 
 <br><br><br>
 
+
+c14 automates your versioning process by analyzing your Git commit history (based on _[conventional commits](https://www.conventionalcommits.org/en/v1.0.0/)_) to determine the next version.
+By default, the tool identifies the latest version tag and evaluates all subsequent commits to calculate the appropriate version.
+For more granular control, you can chose a specific starting point (instead of the last version tag) using `--from` 
+and/or define a custom starting base version (instead of the version of the last version tag) with `--base-version`, allowing you to precisely recalculate a version from any stage of your project's history.
+
+
 ## Install
 ```shell
-wget https://github.com/eloi-menaud/c14/releases/download/v2.0.0/c14
+wget https://github.com/eloi-menaud/c14/releases/download/v3.0.0/c14
 mv c14 /usr/local/bin && chmod +x /usr/local/bin/c14
 ```
-## Description
-Default usage :
+
+### Default usage
+To simply get the version of your repo based on the previous version tag :
+`c14 version`
+_If you do not have previsous version tag, 0.0.0 will be used as base version_
+
+## Usage
+
 ```shell
-version=$(c14)
-git tag $version && git push --tags
-````
+c14 version [--from <FROM> | --base-version <BASE_VERSION> | --strict | --target <TARGET>...]
+(Calculate version)
+      --from <FROM>                  Where to start version calculation
+                                       (by default: look at the last version tag)
+      --base-version <BASE_VERSION>  The base version on wich start to increment regarding commits
+                                       (by default: the value of the last version tag or 0.0.0 if --from used )
+      --strict                       Failed if a commit used for calculation doesn't follow the Convential Commit format
+      --target <TARGET>...           Compute version only regarding specific dir(s) or file(s)
 
-By default, `c14` calculates the version difference between HEAD and the latest tag matching the pattern `vX.Y.Z` or `vX.Y.Z-xxxxx`
+c14 increment <SOURCE> <INCREMENT>
+(Calcutate the incrementation of a version)
+  <INCREMENT>  The increment to add to source (X.Y.Z)
+  <SOURCE>     The source version (X.Y.Z)
 
-To compute the version increment, it parses the commit messages following the _[conventional commits](https://www.conventionalcommits.org/en/v1.0.0/)_ standard.
-
-Commits that do not follow the standard are ignored when calculating the version.
-
-Valid commits trigger version bumps according to their types:
-```text
-Breaking changes  : +v1.0.0
-fix               : +v0.0.1
-feat              : +v0.1.0
-```
-
-# Usage
-```text
-Usage: c14 [OPTIONS]
-
-Options:
-      --from-merge-base <branch>  Use 'git merge-base HEAD <branch>'
-                                  instead of the last tag
-                                  useful for checks during Merge/Pull Requests
-                                  
-      --change-log <path>         Add changes at the top of a markdown changelog file
-      
-      --report                    Creat a c14-report.json report
-      
-      --parse <commit id>         Parse given commit into json format
-      
-      --strict                    Exit with code 1 if a commit used doesn't follow the conventional format
-      
-      --target <path>             Compute version only based on commits affecting the given file/dir path
-      
-  -h, --help                      Print help
-  -V, --version                   Print version
-
-
-
-c14 version <from>
-  --strict
-  --target -t [list]
-  
-c14 incr <source> <increment>
-c14 tag <version>
+c14 parse <COMMIT_ID> [--strict]
+(Parse a specific Commit)
+    <COMMIT_ID>   Commit id of the commit to parse
+    --strict  Failed if the commit doesn't follow the Convential Commit format
 
 ```
 
-<br><br><br>
+## Git snippet for common `--from`
 
-### `--report` & `--parse` Output Format Example
-```jsonc
-{
-  "from": "f7b950c0ee416bb00a0179d264f0b8c1fbd60a44",
-  "to": "fdadd58ace5440b9defc944fa88ea1dacdd80553",
-  "target": null,
-  "version": "v0.2.0",
-  "commits": [
-    { // format of --parse too 
-      "msg": "feat: init\n",
-      "id": "fdadd58ace5440b9defc944fa88ea1dacdd80553",
-      "convcom": {
-        "type": "feat",
-        "scope": null,
-        "description": "init",
-        "body": null,
-        "footers": [],
-        "breaking_change": false
-      }
-    }
-  ]
-}
+#### Latest Tag Oid (Chronological)
+```shell
+git for-each-ref --sort=-creatordate --format="%(objectname)" --count=1 refs/tags
 ```
-### `--change-log` Output Format Example
-```md
-# v1.2.0
-### Breaking Changes
-- breaking change commit description
-### Feats
-- feat commit description
-### Fixes
-- fix 1 commit description
-- fix 2 commit description
+
+#### Initial Commit Oid
+```shell
+git rev-list --max-parents=0 HEAD
+```
+
+#### Last Commit on <branch> affecting a resources in <list of file/dir>
+```shell
+git rev-list -n 1 <branch> -- <list of file/dir>
+```
+
+#### Get the common ancestor (merge-base) with <branch>
+```shell
+git merge-base HEAD <branch>
 ```

@@ -5,7 +5,7 @@ use conventional::{Commit as ConventionalCommitParser, Simple as _};
 use git2::Oid;
 use serde::Serialize;
 
-use crate::version::Version;
+use crate::types::semver::SemVer;
 
 #[derive(Debug, Serialize, Clone)]
 pub struct Fouter {
@@ -34,19 +34,19 @@ pub struct Commit {
 
 impl Commit {
     
-    pub fn get_version_incr(&self) -> Version {
+    pub fn get_version_incr(&self) -> SemVer {
         if let Some(ref cc) = self.convcom {
             if cc.breaking_change{
-                return Version { major: 1, minor: 0, patch: 0 };
+                return SemVer { major: 1, minor: 0, patch: 0 };
             }
             if cc.type_ == "feat" {
-                return Version { major: 0, minor: 1, patch: 0 };
+                return SemVer { major: 0, minor: 1, patch: 0 };
             }
             if cc.type_ == "fix" {
-                return Version { major: 0, minor: 0, patch: 1 };
+                return SemVer { major: 0, minor: 0, patch: 1 };
             }
         }
-        return Version::default();
+        return SemVer::default();
     }
     
     
