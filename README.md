@@ -80,7 +80,7 @@ git rev-list --max-parents=0 HEAD
 
 #### Last Commit on <branch> affecting a resources in <list of file/dir>
 ```shell
-git rev-list -n 1 <branch> -- <list of file/dir>
+git rev-list -n 1 <branch>~1 -- <list of file/dir>
 ```
 
 #### Get the common ancestor (merge-base) with <branch>
