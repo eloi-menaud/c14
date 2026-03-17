@@ -17,31 +17,38 @@ c14 (carbon 14), an auto repo/file/dir version calculator based on _[conventiona
 
 
 c14 automates your versioning process by analyzing your Git commit history (based on _[conventional commits](https://www.conventionalcommits.org/en/v1.0.0/)_) to determine the next version.
+
 By default, the tool identifies the latest version tag and evaluates all subsequent commits to calculate the appropriate version.
+
 For more granular control, you can chose a specific starting point (instead of the last version tag) using `--from` 
 and/or define a custom starting base version (instead of the version of the last version tag) with `--base-version`, allowing you to precisely recalculate a version from any stage of your project's history.
 
 
 ## Install
 ```shell
-wget https://github.com/eloi-menaud/c14/releases/download/v3.0.0/c14
+wget https://github.com/eloi-menaud/c14/releases/download/v4.0.0/c14
 mv c14 /usr/local/bin && chmod +x /usr/local/bin/c14
 ```
+<br><br>
 
 ### Default usage
 To simply get the version of your repo based on the previous version tag :
-`c14 version`
-_If you do not have previsous version tag, 0.0.0 will be used as base version_
+```shell
+c14 version
+```
+_If you do not have a previsous version tag, 0.0.0 will be used as base version_
+
+<br><br>
 
 ## Usage
 
-```shell
+```text
 c14 version [--from <FROM> | --base-version <BASE_VERSION> | --strict | --target <TARGET>...]
 (Calculate version)
       --from <FROM>                  Where to start version calculation
                                        (by default: look at the last version tag)
       --base-version <BASE_VERSION>  The base version on wich start to increment regarding commits
-                                       (by default: the value of the last version tag or 0.0.0 if --from used )
+                                       (by default: the value of the last version tag OR 0.0.0 if --from used )
       --strict                       Failed if a commit used for calculation doesn't follow the Convential Commit format
       --target <TARGET>...           Compute version only regarding specific dir(s) or file(s)
 
@@ -56,6 +63,8 @@ c14 parse <COMMIT_ID> [--strict]
     --strict  Failed if the commit doesn't follow the Convential Commit format
 
 ```
+
+<br><br>
 
 ## Git snippet for common `--from`
 
