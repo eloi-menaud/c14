@@ -106,47 +106,62 @@ pub fn compute_version(repo: &Repository, from_oid: Oid, base_version: SemVer, s
 
 
     let mut diff_opts = DiffOptions::new();
-    for path in targets {
+    for path in &targets {
         diff_opts.pathspec(path);
     }
 
     let mut matched_commits = Vec::new();
 
+    let has_targets = !targets.is_empty();
+    
     for oid_result in revwalk {
-        let commit_oid = oid_result.unwrap();
-        let commit = repo.find_commit(commit_oid).unwrap();
+        let commit_oid = oid_result.expect("OID error");
+        let commit = repo.find_commit(commit_oid).expect("Commit error");
         
-        let current_tree = commit.tree().unwrap();
-        let parent_tree = commit.parent(0).and_then(|p| p.tree()).ok();
-
-        let diff = repo.diff_tree_to_tree(
-            parent_tree.as_ref(),
-            Some(&current_tree),
-            Some(&mut diff_opts)
-        ).unwrap();
-
-        if diff.deltas().len() > 0 {
-            let c = Commit::from(commit);
-            if strict{
-                c.strict_guard();
-            }
-            matched_commits.push(c);
+        let mut touches_paths = false;
+    
+        if has_targets {
+            let current_tree = commit.tree().ok();
+            let parent_tree = commit.parent(0).and_then(|p| p.tree()).ok();
+            
+            let diff = repo.diff_tree_to_tree(
+                parent_tree.as_ref(),
+                current_tree.as_ref(),
+                Some(&mut diff_opts)
+            ).expect("Diff error");
+    
+            touches_paths = diff.deltas().len() > 0;
+        } else {
+            touches_paths = true;
         }
+    
+        let c = Commit::from(commit);
+    
+        matched_commits.push((c, touches_paths));
     }
+    
+        
     
     
     let mut version = base_version;
-    eprintln!("            ─┬─");
-    eprintln!("\x1b[0;0m{:>12} | [from: {from_oid}]\x1b[0;0m", version.to_string());
-    for c in matched_commits{
-        if strict{
-            c.strict_guard();
+    eprintln!("┌──────────────┬──────────────────────────────────────────────────────────────┐");
+    eprintln!("| \x1b[0;0m{:>12} ┼ [from: {from_oid}]             |\x1b[0;0m", version.to_string());
+    for (c, touches) in matched_commits{
+
+        if strict && touches{
+            c.strict_guard()?;
         }
-        version.increment(c.get_version_incr());
+        
+        if touches {
+            version.increment(c.get_version_incr());
+        }
         
         let color: &str = match &c.convcom {
             Some(cc) => {
-                if cc.breaking_change {
+                if !touches {
+                    "0"
+                }
+                else if cc.breaking_change {
                     "35"
                 } else if cc.type_ == "feat" {
                     "34"
@@ -158,9 +173,10 @@ pub fn compute_version(repo: &Repository, from_oid: Oid, base_version: SemVer, s
             },
             None => "0",
         };
-        eprintln!("\x1b[0;{}m{:>12} | {}\x1b[0;0m", color, version.to_string() ,c.msg.lines().next().unwrap_or(""));
+        
+        eprintln!("| \x1b[0;{}m{:>12} ┼ {:<60}\x1b[0;0m |", color, version.to_string() , c.msg.lines().next().unwrap_or_default().chars().take(60).collect::<String>());
     }
-    eprintln!("            ─┴─");
+    eprintln!("└──────────────┴──────────────────────────────────────────────────────────────┘");
 
     
     Ok(version)

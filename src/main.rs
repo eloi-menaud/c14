@@ -47,7 +47,7 @@ fn main() {
     };
     match e {
         Ok(_) => {},
-        Err(e) => { eprintln!("Error : {e}")},
+        Err(e) => { eprintln!("\nError : {e}")},
     }
 }
 

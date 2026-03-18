@@ -1,4 +1,4 @@
-use std::env::VarError;
+use std::{env::VarError, result};
 
 use anyhow::{Result, anyhow};
 use conventional::{Commit as ConventionalCommitParser, Simple as _};
@@ -50,11 +50,11 @@ impl Commit {
     }
     
     
-    pub fn strict_guard(&self) {
+    pub fn strict_guard(&self) -> Result<(),String>{
         if self.convcom.is_none(){
-            panic!("Invalid commit format for commit {0} (strict mode)
+            return Err( format!("(strict mode)
 
-\x1b[0;31m─── Commit Message\x1b[0;0m
+\x1b[0;31m─── Commit Message {1}\x1b[0;0m
 {}
 \x1b[0;31m───\x1b[0;0m
 
@@ -65,15 +65,14 @@ impl Commit {
 
 [optional 'key: value' footer(s) ]
 \x1b[0;34m───\x1b[0;0m
-To see more about conventional commit format rules :
-\x1b[0;34mhttps://www.conventionalcommits.org/en/v1.0.0/#specification\x1b[0;0m
 
 \x1b[0;35mHint\x1b[0;0m : To edit this pushed commit you can use this command :
 
 GIT_SEQUENCE_EDITOR=\"sed -i.bak 's/^pick {1}/reword {1}/'\" \
-git rebase -i $(git rev-parse \"{1}\"^) && \
-git push --force-with-lease", self.id, self.short_id)
+git rebase -i $(git rev-parse {1}^) && \
+git push --force-with-lease", self.msg, self.short_id))
         }
+        return Ok(())
     }
 }
 
